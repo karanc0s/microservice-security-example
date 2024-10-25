@@ -32,3 +32,18 @@ build:
 server:
   port: 8530
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true

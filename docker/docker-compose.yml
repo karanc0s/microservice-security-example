@@ -1,0 +1,105 @@
+services:
+
+  eureka-server:
+    build:
+      context: ../eureka-server
+      dockerfile: Dockerfile
+    container_name: mcs-eureka
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: "curl --fail --silent localhost:8000/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - bank-network
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8000/eureka/
+
+  app-cards-service:
+    build:
+      context: ../cards-service
+      dockerfile: Dockerfile
+    container_name: mcs-cards
+    ports:
+      - "8510:8510"
+    healthcheck:
+      test: "curl --fail --silent localhost:8510/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - bank-network
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8000/eureka/
+
+  app-loans-service:
+    build:
+      context: ../loans-service
+      dockerfile: Dockerfile
+    container_name: mcs-loans
+    ports:
+      - "8520:8520"
+    healthcheck:
+      test: "curl --fail --silent localhost:8520/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - bank-network
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8000/eureka/
+
+
+
+  app-accounts-service:
+    build:
+      context: ../accounts-service
+      dockerfile: Dockerfile
+    container_name: mcs-accounts
+    ports:
+      - "8530:8530"
+    healthcheck:
+      test: "curl --fail --silent localhost:8530/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - bank-network
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8000/eureka/
+
+  api-gateway:
+    build:
+      context: ../api-gateway
+      dockerfile: Dockerfile
+    container_name: mcs-gateway
+    ports:
+      - "8001:8001"
+    depends_on:
+      app-accounts-service:
+        condition: service_healthy
+      app-cards-service:
+        condition: service_healthy
+      app-loans-service:
+        condition: service_healthy
+    networks:
+      - bank-network
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8000/eureka/
+
+
+
+networks:
+  bank-network:
+    driver: bridge
