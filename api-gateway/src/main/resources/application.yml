@@ -5,8 +5,14 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true
+          enabled: false
+          lower-case-service-id: true
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: "http://localhost:7080/realms/realm1/protocol/openid-connect/certs"
 
 server:
   port: 8001
@@ -38,6 +44,6 @@ management:
         enabled: true
 info:
   app:
-    name: "gatewayserver"
-    description: "Eazy Bank Gateway Server Application"
+    name: "Gateway-server"
+    description: "Bank Gateway Server Application"
     version: "1.0.0"
